@@ -1,0 +1,80 @@
+<html>
+    <head>
+	
+    <link rel="stylesheet" href="https://js.arcgis.com/4.21/esri/themes/light/main.css" />
+
+	
+	    <style>
+      html,
+      body,
+      #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 90%;
+        width: 100%;        
+      }
+    </style>
+	<script src="https://js.arcgis.com/4.22/"></script>
+	
+       <script>
+    HTMLCanvasElement.prototype.getContext = (function(origFn) {
+      return function(type, attributes) {
+        if (
+          ["experimental-webgl", "webgl", "webkit-3d", "moz-webgl"].includes(type)
+        ) {
+          attributes = Object.assign({}, attributes, {
+            preserveDrawingBuffer: true
+          });
+        }
+        return origFn.call(this, type, attributes);
+      };
+    })(HTMLCanvasElement.prototype.getContext);
+  
+  	require(["esri/views/MapView", "esri/WebMap"], (MapView, WebMap) => {
+        const webmap = new WebMap({
+          portalItem: {
+            // autocasts as new PortalItem()
+            id: "f2e9b762544945f390ca4ac3671cfa72"
+			//id: "f2e9b762544945f390ca4ac3671cfa72"
+          }
+        });
+
+        const view = new MapView({
+          map: webmap,
+          container: "viewDiv"
+        });
+    });
+
+</script>
+    </head>
+<body>
+  <h1>Sample Print</h1>
+  <div id="viewDiv"></div>
+  <img id="canvasImage" style="display:none" src="#" alt="" />
+  <p>
+    <button onclick="print()">Print</button>    
+    <script>
+      'use strict'
+      function print() {
+        var canvas = document.getElementsByTagName("canvas")[0];
+        var gl = canvas.getContext("webgl", {
+          preserveDrawingBuffer: true
+        });
+        var dataString = canvas.toDataURL();
+        document.getElementById('canvasImage').setAttribute('src', dataString);
+        hide(document.getElementById("viewDiv"));
+        show(document.getElementById('canvasImage'));
+      }
+      
+      var show = function (elem) {
+        elem.style.display = 'block';
+      };
+
+      // Hide an element
+      var hide = function (elem) {
+        elem.style.display = 'none';
+      };
+
+    </script>
+</body>
+</html>
