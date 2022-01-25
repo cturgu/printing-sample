@@ -92,7 +92,7 @@
       //const urlParam = encodeURIComponent("http://localhost:8282/index.html#print")
       const urlParam = encodeURIComponent("https://cturgu.github.io/printing-sample#print")
       console.log(urlParam)
-      xhr.open('GET', "https://func-uksouth-geo-print-poc-qa01.azurewebsites.net/api/PuppeteerPrintingFunction?code=4as/OJbGOaPcSeMG9JTmA/klXbd04Bw0IxOsUQrURyYaJG5N3O3nwA==?url="+urlParam, true);
+      xhr.open('GET', "https://func-uksouth-geo-print-poc-qa01.azurewebsites.net/api/PuppeteerPrintingFunction?url="+urlParam, true);
       //xhr.open('GET', "http://localhost:7071/api/PuppeteerPrintingFunction?url="+urlParam, true);
       xhr.send();
       
