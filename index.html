@@ -24,7 +24,8 @@
           ["experimental-webgl", "webgl", "webkit-3d", "moz-webgl"].includes(type)
         ) {
           attributes = Object.assign({}, attributes, {
-            preserveDrawingBuffer: true
+            preserveDrawingBuffer: true,
+			      premultipliedAlpha: false
           });
         }
         return origFn.call(this, type, attributes);
@@ -44,14 +45,11 @@
           container: "viewDiv"
         });
 
-        window.onload = function(){
-          console.log(window.location.hash)
-        if(window.location.hash === "#print") {
-          preparePrint()
-        }
-};
-
-
+        view.when(() => { 
+			if(window.location.hash === "#print") {
+			  setTimeout(pageready, 5000);          
+			}
+        });
      
     });
 
@@ -60,18 +58,25 @@
 <body>
   <h1>Sample Print</h1>
   <div id="viewDiv"></div>
+  <div id="pageReady" style="display:none"></div>
   <img id="canvasImage" style="display:none" src="#" alt="" />
   <p>
     <button id= "btnPrint" onclick="printHandle()">Print</button>     
     <script>
       'use strict'
       function printHandle() {
-        fetchRequest();   
-        preparePrint()           ;
+        fetchRequest();           
+      }
+
+      function pageready()
+      {
+        document.getElementById("pageReady").innerHTML = "OK";
+        preparePrint()
       }
 
       function preparePrint()
       {
+        console.log("preParePrint() initiated.");
         hide(document.getElementById("btnPrint"));
         var canvas = document.getElementsByTagName("canvas")[0];
         var gl = canvas.getContext("webgl", {
@@ -93,45 +98,29 @@
       };
 
  
-  function fetchRequest(){
-      console.log("CAM");
+	function fetchRequest(){
+		  console.log("CAM");
 
-      let xhr = new XMLHttpRequest();
-      //const urlParam = encodeURIComponent("http://localhost:8282/index.html#print")
-      const urlParam = encodeURIComponent("https://cturgu.github.io/printing-sample#print")
-      console.log(urlParam)
-      xhr.open('GET', "https://func-uksouth-geo-print-poc-qa01.azurewebsites.net/api/PuppeteerPrintingFunction?url="+urlParam, true);
-      //xhr.open('GET', "http://localhost:7071/api/PuppeteerPrintingFunction?url="+urlParam, true);
-      xhr.send();
-      
-      xhr.addEventListener("readystatechange", processRequest, false);
-
-      function processRequest(e) {
-        console.log(xhr.responseText)
-    //     if (xhr.readyState == 4 && xhr.status == 200) {
-		// // time to partay!!!
-    // }
-
-}
-
-  }
-
-
-      function sendRequest() {
-        $.ajax({
-          url: 'http://localhost:7071/api/PuppeteerPrintingFunction',
-          type: "GET",
-          success: function(result){
-            console.log(result)
-          },
-          error: function(xhr, status, errorThrown){
-           console.log(xhr.status)
-           console.log(errorThrown)
-          }
-        })
-
-      };
-
+		  let xhr = new XMLHttpRequest();
+		  //const urlParam = encodeURIComponent("http://localhost:8282/index.html#print")
+		  const urlParam = encodeURIComponent("https://cturgu.github.io/printing-sample#print")
+		  console.log(urlParam)
+		  xhr.open('GET', "https://func-uksouth-geo-print-poc-qa01.azurewebsites.net/api/PuppeteerPrintingFunction?url="+urlParam, true);
+		  //xhr.open('GET', "http://localhost:7071/api/PuppeteerPrintingFunction?url="+urlParam, true);
+		  xhr.responseType = "blob";
+		  xhr.send();
+		  
+		  xhr.addEventListener("readystatechange", processRequest, false);
+		  function processRequest(e) {
+			if (xhr.readyState == 4 && xhr.status == 200) {
+				 //var blob = new Blob([xhr.response], { type: 'application/pdf' }),
+				 var link=document.createElement('a');
+				 link.href=window.URL.createObjectURL(xhr.response);
+				 link.download='print.pdf';
+				 link.click();
+			}
+		}
+	}
     </script>
 </body>
 </html>
