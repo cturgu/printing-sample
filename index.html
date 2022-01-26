@@ -1,83 +1,117 @@
 <html>
-    <head>
-      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <link rel="stylesheet" href="https://js.arcgis.com/4.21/esri/themes/light/main.css" />
 
-	
-	    <style>
-      html,
-      body,
-      #viewDiv {
-        padding: 0;
-        margin: 0;
-        height: 90%;
-        width: 100%;        
-      }
-    </style>
-	<script src="https://js.arcgis.com/4.22/"></script>
-  
-	
-       <script>
-    HTMLCanvasElement.prototype.getContext = (function(origFn) {
-      return function(type, attributes) {
+<head>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <link rel="stylesheet" href="https://js.arcgis.com/4.21/esri/themes/light/main.css" />
+
+
+  <style>
+    html,
+    body,
+    #viewDiv {
+      padding: 0;
+      margin: 0;
+      height: 90%;
+      width: 100%;
+    }
+  </style>
+  <script src="https://js.arcgis.com/4.22/"></script>
+
+
+  <script>
+    HTMLCanvasElement.prototype.getContext = (function (origFn) {
+      return function (type, attributes) {
         if (
           ["experimental-webgl", "webgl", "webkit-3d", "moz-webgl"].includes(type)
         ) {
           attributes = Object.assign({}, attributes, {
             preserveDrawingBuffer: true,
-			      premultipliedAlpha: false
+            premultipliedAlpha: false
           });
         }
         return origFn.call(this, type, attributes);
       };
     })(HTMLCanvasElement.prototype.getContext);
-  
-  	require(["esri/views/MapView", "esri/WebMap"], (MapView, WebMap) => {
-        const webmap = new WebMap({
-          portalItem: {
-            // autocasts as new PortalItem()
-            id: "f2e9b762544945f390ca4ac3671cfa72"
-          }
-        });
 
-        const view = new MapView({
-          map: webmap,
-          container: "viewDiv"
-        });
+    require(["esri/views/MapView", "esri/WebMap"], (MapView, WebMap) => {
+      const webmap = new WebMap({
+        portalItem: {
+          // autocasts as new PortalItem()
+          id: "f2e9b762544945f390ca4ac3671cfa72"
+        }
+      });
 
-        view.when(() => { 
-			if(window.location.hash === "#print") {
-			  setTimeout(pageready, 8000);          
-			}
-        });
-     
+      const view = new MapView({
+        map: webmap,
+        container: "viewDiv"
+      });
+
+      view.when(() => {
+        if (window.location.hash === "#print") {
+          setTimeout(pageready, 8000);
+        }
+      });
+
     });
 
-</script>
-    </head>
+  </script>
+</head>
+
 <body>
   <h1>Sample Print</h1>
   <div id="viewDiv"></div>
   <div id="pageReady" style="display:none"></div>
   <img id="canvasImage" style="display:none" src="#" alt="" />
   <p>
-    <button id= "btnPrint" onclick="printHandle()">Print</button>     
+    <button id="btnPrint" onclick="printHandle()">Print</button>
+    <label id="lblFormat" for="format">Page size </label>
+    <select id="format">
+      <option value="a0">A0</option>
+      <option value="a1">A1</option>
+      <option value="a2">A2</option>
+      <option value="a3">A3</option>
+      <option value="a4" selected>A4</option>
+      <option value="a5">A5</option>
+    </select>
+    <label id ="lblOrientation" for="orientation">Orientation</label>
+    <select id="orientation">
+      <option value="portrait" selected>Portrait</option>
+      <option value="landspace">Landscape</option>
+    </select>
+    <label id="lblScale" for="scale">Scale</label>
+    <select id="scale">
+      <option value="0.2">0.2</option>
+      <option value="0.4">0.4</option>
+      <option value="0.6">0.6</option>
+      <option value="0.8">0.8</option>
+      <option value="1.0" selected>1.0</option>
+      <option value="1.2">1.2</option>
+      <option value="1.4">1.4</option>
+      <option value="1.6">1.6</option>
+      <option value="1.8">1.8</option>
+      <option value="2.0">2.0</option>
+    </select>
+
     <script>
       'use strict'
       function printHandle() {
-        fetchRequest();           
+        fetchRequest();
       }
 
-      function pageready()
-      {
+      function pageready() {
         document.getElementById("pageReady").innerHTML = "OK";
         preparePrint()
       }
 
-      function preparePrint()
-      {
+      function preparePrint() {
         console.log("preParePrint() initiated.");
         hide(document.getElementById("btnPrint"));
+        hide(document.getElementById("lblFormat"));
+        hide(document.getElementById("format"));
+        hide(document.getElementById("lblOrientation"));
+        hide(document.getElementById("orientation"));
+        hide(document.getElementById("lblScale"));
+        hide(document.getElementById("scale"));
         var canvas = document.getElementsByTagName("canvas")[0];
         var gl = canvas.getContext("webgl", {
           preserveDrawingBuffer: true
@@ -87,7 +121,7 @@
         hide(document.getElementById("viewDiv"));
         show(document.getElementById('canvasImage'));
       }
-      
+
       var show = function (elem) {
         elem.style.display = 'block';
       };
@@ -97,30 +131,26 @@
         elem.style.display = 'none';
       };
 
- 
-	function fetchRequest(){
-		  console.log("CAM");
+      function fetchRequest() {
 
-		  let xhr = new XMLHttpRequest();
-		  //const urlParam = encodeURIComponent("http://localhost:8282/index.html#print")
-		  const urlParam = encodeURIComponent("https://cturgu.github.io/printing-sample#print")
-		  console.log(urlParam)
-		  xhr.open('GET', "https://func-uksouth-geo-print-poc-qa01.azurewebsites.net/api/PuppeteerPrintingFunction?url="+urlParam, true);
-		  //xhr.open('GET', "http://localhost:7071/api/PuppeteerPrintingFunction?url="+urlParam, true);
-		  xhr.responseType = "blob";
-		  xhr.send();
-		  
-		  xhr.addEventListener("readystatechange", processRequest, false);
-		  function processRequest(e) {
-			if (xhr.readyState == 4 && xhr.status == 200) {
-				 //var blob = new Blob([xhr.response], { type: 'application/pdf' }),
-				 var link=document.createElement('a');
-				 link.href=window.URL.createObjectURL(xhr.response);
-				 link.download='print.pdf';
-				 link.click();
-			}
-		}
-	}
+        let xhr = new XMLHttpRequest();
+        const urlParam = encodeURIComponent("https://cturgu.github.io/printing-sample#print" + "?format=" +  document.getElementById("format").value + "&orientation=" + document.getElementById("orientation").value +"&scale="+ document.getElementById("scale").value )        
+        console.log(urlParam)
+        xhr.open('GET', "https://func-uksouth-geo-print-poc-qa01.azurewebsites.net/api/PuppeteerPrintingFunction?url=" + urlParam, true);
+        xhr.responseType = "blob";
+        xhr.send();
+
+        xhr.addEventListener("readystatechange", processRequest, false);
+        function processRequest(e) {
+          if (xhr.readyState == 4 && xhr.status == 200) {
+            //var blob = new Blob([xhr.response], { type: 'application/pdf' }),
+            var link = document.createElement('a');
+            link.href = window.URL.createObjectURL(xhr.response);
+            link.download = 'print.pdf';
+            link.click();
+          }
+        }
+      }
     </script>
 </body>
 </html>
