@@ -134,7 +134,7 @@
       function fetchRequest() {
 
         let xhr = new XMLHttpRequest();
-        const urlParam = encodeURIComponent("https://cturgu.github.io/printing-sample#print" + "?format=" +  document.getElementById("format").value + "&orientation=" + document.getElementById("orientation").value +"&scale="+ document.getElementById("scale").value )        
+        const urlParam = encodeURIComponent("https://cturgu.github.io/printing-sample#print" + "&format=" +  document.getElementById("format").value + "&orientation=" + document.getElementById("orientation").value +"&scale="+ document.getElementById("scale").value )        
         console.log(urlParam)
         xhr.open('GET', "https://func-uksouth-geo-print-poc-qa01.azurewebsites.net/api/PuppeteerPrintingFunction?url=" + urlParam, true);
         xhr.responseType = "blob";
