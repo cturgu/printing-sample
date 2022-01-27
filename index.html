@@ -3,6 +3,7 @@
 <head>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <link rel="stylesheet" href="https://js.arcgis.com/4.21/esri/themes/light/main.css" />
+  <link rel="stylesheet" href="styles.css">
 
 
   <style>
@@ -62,6 +63,7 @@
   <div id="viewDiv"></div>
   <div id="pageReady" style="display:none"></div>
   <img id="canvasImage" style="display:none" src="#" alt="" />
+  <div id="loading" class="loading">Loading&#8230</div>
   <p>
     <button id="btnPrint" onclick="printHandle()">Print</button>
     <label id="lblFormat" for="format">Page size </label>
@@ -95,6 +97,8 @@
     <script>
       'use strict'
       function printHandle() {
+        var loadingDiv = document.getElementById('loading');
+        loadingDiv.style.visibility = 'visible';
         fetchRequest();
       }
 
@@ -133,15 +137,18 @@
 
       function fetchRequest() {
 
-        let xhr = new XMLHttpRequest();
+        let xhr = new XMLHttpRequest();        
         const urlParam = encodeURIComponent("https://cturgu.github.io/printing-sample#print" + "&format=" +  document.getElementById("format").value + "&orientation=" + document.getElementById("orientation").value +"&scale="+ document.getElementById("scale").value )        
-        console.log(urlParam)
+        
         xhr.open('GET', "https://func-uksouth-geo-print-poc-qa01.azurewebsites.net/api/PuppeteerPrintingFunction?url=" + urlParam, true);
         xhr.responseType = "blob";
         xhr.send();
 
         xhr.addEventListener("readystatechange", processRequest, false);
         function processRequest(e) {
+          var loadingDiv = document.getElementById('loading');
+          loadingDiv.style.visibility = 'hidden';
+
           if (xhr.readyState == 4 && xhr.status == 200) {
             //var blob = new Blob([xhr.response], { type: 'application/pdf' }),
             var link = document.createElement('a');
