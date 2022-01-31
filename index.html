@@ -2,7 +2,7 @@
 
 <head>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-  <link rel="stylesheet" href="https://js.arcgis.com/4.21/esri/themes/light/main.css" />
+  <link rel="stylesheet" href="https://js.arcgis.com/4.22/esri/themes/light/main.css" />
   <link rel="stylesheet" href="styles.css">
 
 
@@ -34,6 +34,7 @@
       };
     })(HTMLCanvasElement.prototype.getContext);
 
+    let view;    
     require(["esri/views/MapView", "esri/WebMap"], (MapView, WebMap) => {
       const webmap = new WebMap({
         portalItem: {
@@ -42,14 +43,28 @@
         }
       });
 
-      const view = new MapView({
+      view = new MapView({
         map: webmap,
         container: "viewDiv"
       });
 
+
+
+    
+      var parameters;
       view.when(() => {
-        if (window.location.hash === "#print") {
-          setTimeout(pageready, 8000);
+        if (window.location.hash.includes("#print")) {
+          setTimeout(pageready, 9000);
+          parameters = getSearchParameters();
+          console.log("parameters[0]" + parameters['longitude'])
+          console.log("parameters[1]" + parameters['lattitude'])
+          console.log("parameters[2]" + parameters['zoom'])
+
+          view.goTo({
+          target: [parameters['longitude'], parameters['lattitude']],
+          zoom: parameters['zoom']
+        })
+  
         }
       });
 
@@ -103,12 +118,28 @@
       }
 
       function pageready() {
-        document.getElementById("pageReady").innerHTML = "OK";
+        document.getElementById("pageReady").innerHTML = "OK";       
         preparePrint()
       }
 
+      function getSearchParameters() {
+          var prmstr = window.location.hash.substr(7);
+          return prmstr != null && prmstr != "" ? transformToAssocArray(prmstr) : {};
+      }
+
+      function transformToAssocArray( prmstr ) {
+          var params = {};
+          var prmarr = prmstr.split("&");
+          for ( var i = 0; i < prmarr.length; i++) {
+              var tmparr = prmarr[i].split("=");
+              params[tmparr[0]] = tmparr[1];
+          }
+          return params;
+      }
+
       function preparePrint() {
-        console.log("preParePrint() initiated.");
+        console.log("preParePrint() initiated.");  
+
         hide(document.getElementById("btnPrint"));
         hide(document.getElementById("lblFormat"));
         hide(document.getElementById("format"));
@@ -135,12 +166,16 @@
         elem.style.display = 'none';
       };
 
+
+
+
       function fetchRequest() {
 
-        let xhr = new XMLHttpRequest();        
-        const urlParam = encodeURIComponent("https://cturgu.github.io/printing-sample#print" + "&format=" +  document.getElementById("format").value + "&orientation=" + document.getElementById("orientation").value +"&scale="+ document.getElementById("scale").value )        
-        
-        xhr.open('GET', "https://func-uksouth-geo-print-poc-qa01.azurewebsites.net/api/PuppeteerPrintingFunction?url=" + urlParam, true);
+        console.log("latitude: " + view.center.latitude);
+
+        let xhr = new XMLHttpRequest();
+        const urlParam = encodeURIComponent("https://cturgu.github.io/printing-sample#print" + "&format=" +  document.getElementById("format").value + "&orientation=" + document.getElementById("orientation").value +"&scale="+ document.getElementById("scale").value+ "&latitude=" + view.center.latitude +"&longitude=" + view.center.longitude + "&zoom=" + view.zoom)                
+        xhr.open('GET', "https://func-uksouth-geo-print-poc-qa01.azurewebsites.net/api/PuppeteerPrintingFunction?url=" + urlParam, true);        
         xhr.responseType = "blob";
         xhr.send();
 
@@ -161,3 +196,4 @@
     </script>
 </body>
 </html>
+
